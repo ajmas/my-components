@@ -1,42 +1,42 @@
 const webpack = require('webpack');
 const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-const BUILD_DIR = path.resolve(__dirname, 'lib');
-const SRC_DIR = path.resolve(__dirname, 'src');
+var BUILD_DIR = path.resolve(__dirname, 'lib');
+var APP_DIR = path.resolve(__dirname, 'src');
 
 module.exports = {
-    context: __dirname + '/src',
-    entry: {
-        app: ['./index.js']
-    },
+    entry: APP_DIR + '/index.js',
     devtool: 'source-map',
     output: {
-        libraryTarget: "umd",
+        library: 'ariaReactComponents',
         path: BUILD_DIR,
-        filename: 'index.js',
-        publicPath: 'lib'
+        filename: 'index.js'
+    },
+    module: {
+        rules: [{
+                test: /\.js$/,
+                // include: APP_DIR,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['env', 'es2015', 'react']
+                    }
+                }
+            }]
     },
     plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-                'NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-            }
+        new CleanWebpackPlugin([BUILD_DIR], {
+            root: path.resolve(__dirname),
+            verbose: true,
+            dry: false,
+            exclude: []
         })
     ],
-    module: {
-        loaders: [{
-            test: /\.jsx?/,
-            include: SRC_DIR,
-            exclude: /(node_modules)/,
-
-            loader: 'babel-loader',
-            query: {
-                presets: [
-                    'babel-preset-es2015',
-                    'babel-preset-react',
-                    'babel-preset-stage-0',
-                ].map(require.resolve)
-            }
-        }]
+    resolve: {
+        extensions: [
+            '.js'
+        ]
     }
 };
